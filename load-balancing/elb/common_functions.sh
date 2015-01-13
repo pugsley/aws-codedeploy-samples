@@ -22,7 +22,7 @@ ELB_LIST=""
 export PATH="$PATH:/usr/bin:/usr/local/bin"
 
 # If true, all messages will be printed. If false, only fatal errors are printed.
-DEBUG=true 
+DEBUG=true
 
 # Number of times to check for a resouce to be in the desired state.
 WAITER_ATTEMPTS=60
@@ -187,7 +187,7 @@ autoscaling_exit_standby() {
 #    non-zero.
 get_instance_state_asg() {
     local instance_id=$1
-    
+
     local state=$($AWS_CLI autoscaling describe-auto-scaling-instances \
         --instance-ids $instance_id \
         --query "AutoScalingInstances[?InstanceId == \`$instance_id\`].LifecycleState | [0]" \
@@ -205,7 +205,7 @@ reset_waiter_timeout() {
 
     local health_check_values=$($AWS_CLI elb describe-load-balancers \
         --load-balancer-name $elb \
-        --query 'LoadBalancerDescriptions[0].HealthCheck.[HealthyThreshold, Interval]' \
+        --query 'LoadBalancerDescriptions[0].HealthCheck.[UnhealthyThreshold, Interval]' \
         --output text)
 
     WAITER_ATTEMPTS=$(echo $health_check_values | awk '{print $1}')
@@ -344,7 +344,7 @@ get_elb_list() {
 
     if [ -z "$elb_list" ]; then
         return 1
-    else 
+    else
         msg "Got load balancer list of: $elb_list"
         INSTANCE_ELBS=$elb_list
         return 0
