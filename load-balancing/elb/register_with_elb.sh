@@ -41,7 +41,7 @@ if [ $? == 0 -a -n "$asg" ]; then
     msg "Attempting to move instance out of Standby"
     autoscaling_exit_standby $INSTANCE_ID $asg
     if [ $? != 0 ]; then
-        error_exit "Failed to move instance out of standby"
+        error_exit "Failed to move instance $INSTANCE_ID out of standby"
     else
         msg "Instance is no longer in Standby"
         exit 0

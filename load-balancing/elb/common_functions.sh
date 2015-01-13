@@ -22,7 +22,7 @@ ELB_LIST=""
 export PATH="$PATH:/usr/bin:/usr/local/bin"
 
 # If true, all messages will be printed. If false, only fatal errors are printed.
-DEBUG=true 
+DEBUG=true
 
 # Number of times to check for a resouce to be in the desired state.
 WAITER_ATTEMPTS=60
@@ -93,6 +93,9 @@ autoscaling_enter_standby() {
     if [ "$instance_state" == "Standby" ]; then
         msg "Instance is already in Standby; nothing to do."
         return 0
+    elif [ "$instance_state" == "Pending:Wait" ]; then
+        msg "Instance is in Pending:Wait; nothing to do."
+        return 0
     fi
 
     msg "Checking to see if ASG $asg_name will let us decrease desired capacity"
@@ -158,6 +161,9 @@ autoscaling_exit_standby() {
     if [ "$instance_state" == "InService" ]; then
         msg "Instance is already InService; nothing to do."
         return 0
+    elif [ "$instance_state" == "Pending:Wait" ]; then
+        msg "Instance is in Pending:Wait; nothing to do."
+        return 0
     fi
 
     msg "Moving instance $instance_id out of Standby"
@@ -187,7 +193,7 @@ autoscaling_exit_standby() {
 #    non-zero.
 get_instance_state_asg() {
     local instance_id=$1
-    
+
     local state=$($AWS_CLI autoscaling describe-auto-scaling-instances \
         --instance-ids $instance_id \
         --query "AutoScalingInstances[?InstanceId == \`$instance_id\`].LifecycleState | [0]" \
@@ -344,7 +350,7 @@ get_elb_list() {
 
     if [ -z "$elb_list" ]; then
         return 1
-    else 
+    else
         msg "Got load balancer list of: $elb_list"
         INSTANCE_ELBS=$elb_list
         return 0
